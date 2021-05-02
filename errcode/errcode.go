@@ -41,6 +41,14 @@ type ErrorInfo struct {
 	Metadata map[string]string `json:"metadata"`
 }
 
+func NewErrInfo(e *Error, domain, reason string) *ErrorInfo {
+	return &ErrorInfo{
+		err:    e,
+		Domain: domain,
+		Reason: reason,
+	}
+}
+
 func (e *ErrorInfo) Error() string {
 	return fmt.Sprintf("error: domain = %s reason = %s matedata = %v", e.Domain, e.Reason, e.Metadata)
 }

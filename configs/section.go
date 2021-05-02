@@ -2,15 +2,19 @@ package configs
 
 var (
 	ServerSetting   *Server
+	JWTSetting      *JWTConfig
 	DatabaseSetting *Database
 )
 
 type Server struct {
-	RunMode   string
-	HttpPort  string
-	JWTSecret string
-	JWTExpire int // 启动时 x time.Second
-	JWTIssuer string
+	RunMode  string
+	HttpPort string
+}
+
+type JWTConfig struct {
+	Secret string
+	Issuer string
+	Expire int
 }
 
 type Database struct {
