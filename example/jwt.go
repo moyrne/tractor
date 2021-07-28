@@ -1,5 +1,0 @@
-package example
-
-func JWTGenerate() {
-
-}
