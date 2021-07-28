@@ -1,4 +1,4 @@
-package thread
+package safe
 
 type WorkerGroup struct {
 	work func()

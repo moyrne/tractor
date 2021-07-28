@@ -15,11 +15,11 @@ type Tx struct {
 }
 
 func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) (err error) {
-	var tx *sqlx.Tx
-	tx, err = d.Beginx()
+	tx, err := d.Beginx()
 	if err != nil {
 		return errors.Wrap(err, "beginx")
 	}
+	txx := &Tx{Tx: tx}
 	// recover
 	defer func() {
 		if r := recover(); r != nil {
@@ -30,8 +30,8 @@ func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, t
 			}
 		}
 		if err != nil {
-			if e := tx.Rollback(); e != nil {
-				err = errors.Wrapf(err, "rollback %v", e)
+			if e := txx.Rollback(); e != nil {
+				err = errors.WithMessagef(err, "rollback %v", e)
 			}
 			return
 		}

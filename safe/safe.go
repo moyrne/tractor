@@ -1,6 +1,8 @@
-package thread
+package safe
 
-import "github.com/moyrne/tractor/logx"
+import (
+	"github.com/moyrne/tractor/logx"
+)
 
 // Go run the fn. recover fn, when it panic
 func Go(fn func()) {

@@ -1,4 +1,4 @@
-package thread
+package safe
 
 import "sync"
 
