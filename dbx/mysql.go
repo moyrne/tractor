@@ -1,6 +1,7 @@
 package dbx
 
 import (
+	"context"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -17,5 +18,8 @@ func ConnectMySQL(format string, data DSN) (err error) {
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(30)
 	DB = &DBX{DB: db}
+	DB.NewTransaction(context.Background(), func(ctx context.Context) error {
+		return nil
+	})
 	return errors.WithStack(DB.Ping())
 }

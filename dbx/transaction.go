@@ -10,8 +10,11 @@ import (
 type DBX struct {
 	*sqlx.DB
 }
+type Tx struct {
+	*sqlx.Tx
+}
 
-func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context) error) (err error) {
+func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) (err error) {
 	var tx *sqlx.Tx
 	tx, err = d.Beginx()
 	if err != nil {
@@ -35,5 +38,5 @@ func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context) e
 		err = errors.Wrap(tx.Commit(), "tx commit")
 	}()
 
-	return fn(ctx)
+	return fn(ctx, &Tx{Tx: tx})
 }
