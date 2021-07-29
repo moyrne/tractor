@@ -6,8 +6,12 @@ import (
 
 // Go run the fn. recover fn, when it panic
 func Go(fn func()) {
+	go Run(fn)
+}
+
+func Run(fn func()) {
 	defer Recover()
-	go fn()
+	fn()
 }
 
 // Recover cleanup on panic
