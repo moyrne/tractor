@@ -20,11 +20,11 @@ func (t *Tx) Rollback() error {
 }
 
 func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) (err error) {
-	tx, err := d.Beginx()
+	t, err := d.Beginx()
 	if err != nil {
 		return errors.Wrap(err, "beginx")
 	}
-	txx := &Tx{Tx: tx}
+	tx := &Tx{Tx: t}
 	// recover
 	defer func() {
 		if r := recover(); r != nil {
@@ -33,9 +33,10 @@ func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, t
 			if !ok {
 				err = fmt.Errorf("%v", r)
 			}
+			err = errors.WithMessage(err, "recover")
 		}
 		if err != nil {
-			if e := txx.Rollback(); e != nil {
+			if e := tx.Rollback(); e != nil {
 				err = errors.WithMessagef(err, "rollback %v", e)
 			}
 			return
@@ -43,5 +44,5 @@ func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, t
 		err = errors.Wrap(tx.Commit(), "tx commit")
 	}()
 
-	return fn(ctx, &Tx{Tx: tx})
+	return fn(ctx, tx)
 }
