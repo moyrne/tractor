@@ -14,6 +14,11 @@ type Tx struct {
 	*sqlx.Tx
 }
 
+//go:noinline
+func (t *Tx) Rollback() error {
+	return t.Tx.Rollback()
+}
+
 func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) (err error) {
 	tx, err := d.Beginx()
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"runtime/debug"
 	"time"
 )
@@ -19,15 +20,10 @@ func Init(out ...io.Writer) {
 
 func FileWriter(filename string) (*os.File, error) {
 	if filename == "" {
-		filename = "logs/default.log"
-		d, e := os.Open("logs")
-		if e != nil {
-			if err := os.MkdirAll("logs", 0666); err != nil {
-				return nil, err
-			}
-		} else {
-			_ = d.Close()
-		}
+		filename = "default.log"
+	}
+	if err := os.MkdirAll(path.Dir(filename), 0666); err != nil {
+		return nil, err
 	}
 	return os.OpenFile(filename, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
 }

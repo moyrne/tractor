@@ -1,7 +1,6 @@
 package dbx
 
 import (
-	"fmt"
 	_ "unsafe"
 
 	"context"
@@ -14,11 +13,6 @@ import (
 	"testing"
 )
 
-// 有无其他方法对 database/sql.(*Tx).rollback 进行打桩?
-// sql.(*Tx).Rollback is inline, can't mock
-//go:linkname rollbackFn database/sql.(*Tx).rollback
-func rollbackFn(*sql.Tx, bool) error
-
 func TestNewTransaction(t *testing.T) {
 	var rollback, committed bool
 	reset := func() {
@@ -28,7 +22,7 @@ func TestNewTransaction(t *testing.T) {
 	ApplyMethod(reflect.TypeOf(&sqlx.DB{}), "Beginx", func(db *sqlx.DB) (*sqlx.Tx, error) {
 		return &sqlx.Tx{}, nil
 	})
-	ApplyFunc(rollbackFn, func(tx *sql.Tx, discardConn bool) error {
+	ApplyMethod(reflect.TypeOf(&Tx{}), "Rollback", func(tx *Tx) error {
 		rollback = true
 		return nil
 	})
@@ -53,7 +47,6 @@ func TestNewTransaction(t *testing.T) {
 		err := DB.NewTransaction(ctx, func(ctx context.Context, tx *Tx) error {
 			return errors.WithStack(returnErr)
 		})
-		fmt.Println("err", err)
 		assert.Equal(t, true, rollback)
 		assert.Equal(t, false, committed)
 		assert.Equal(t, returnErr, errors.Cause(err))
