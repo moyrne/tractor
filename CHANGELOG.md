@@ -1,5 +1,11 @@
 # CHANGELOG
 
-# v0.1.0
+## v0.1.1
+
 * moyrn
-  * 基础功能搭建 
+    * syncx.Map 可并发调用map
+
+## v0.1.0
+
+* moyrn
+    * 基础功能搭建
