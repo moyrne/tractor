@@ -6,7 +6,7 @@ type Error struct {
 }
 
 type ErrorInfo struct {
-	err      *Error
+	Err      *Error            `json:"err"`
 	Domain   string            `json:"domain"`
 	Reason   string            `json:"reason"`
 	Metadata map[string]string `json:"metadata"`
