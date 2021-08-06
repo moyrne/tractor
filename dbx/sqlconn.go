@@ -3,18 +3,18 @@ package dbx
 import (
 	"context"
 	"database/sql"
+	"github.com/jmoiron/sqlx"
 )
 
 type (
-	Conn interface {
-		Begin() error
+	Database interface {
+		Begin() (Transaction, error)
+		Ping() error
 	}
 	Transaction interface {
-		Session
 		Commit() error
 		Rollback() error
-	}
-	Session interface {
+
 		Get(dst interface{}, query string, args ...interface{}) error
 		Select(dst interface{}, query string, args ...interface{}) error
 		Exec(query string, args ...interface{}) (sql.Result, error)
@@ -23,3 +23,24 @@ type (
 		SelectContext(ctx context.Context, dst interface{}, query string, args ...interface{}) error
 	}
 )
+
+type DatabaseSQLX struct {
+	*sqlx.DB
+}
+
+func (db *DatabaseSQLX) Begin() (Transaction, error) {
+	tx, err := db.Beginx()
+	return &Tx{Tx: tx}, err
+}
+
+type Tx struct {
+	*sqlx.Tx
+}
+
+func (t *Tx) Commit() error {
+	return t.Tx.Commit()
+}
+
+func (t *Tx) Rollback() error {
+	return t.Tx.Rollback()
+}

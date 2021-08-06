@@ -1,6 +1,6 @@
 package dbx
 
-var DB *DBX
+var DB Database
 
 type DSN struct {
 	Host     string

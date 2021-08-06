@@ -16,6 +16,6 @@ func ConnectMySQL(format string, data DSN) (err error) {
 	}
 	db.SetMaxIdleConns(5)
 	db.SetMaxOpenConns(30)
-	DB = &DBX{DB: db}
+	DB = &DatabaseSQLX{DB: db}
 	return errors.WithStack(DB.Ping())
 }

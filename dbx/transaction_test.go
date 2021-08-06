@@ -4,61 +4,41 @@ import (
 	_ "unsafe"
 
 	"context"
-	"database/sql"
-	. "github.com/agiledragon/gomonkey"
-	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"reflect"
 	"testing"
 )
 
 func TestNewTransaction(t *testing.T) {
-	var rollback, committed bool
-	reset := func() {
-		rollback = false
-		committed = false
-	}
-	ApplyMethod(reflect.TypeOf(&sqlx.DB{}), "Beginx", func(db *sqlx.DB) (*sqlx.Tx, error) {
-		return &sqlx.Tx{}, nil
-	})
-	ApplyMethod(reflect.TypeOf(&Tx{}), "Rollback", func(tx *Tx) error {
-		rollback = true
-		return nil
-	})
-	ApplyMethod(reflect.TypeOf(&sql.Tx{}), "Commit", func(tx *sql.Tx) error {
-		committed = true
-		return nil
-	})
-
 	ctx := context.Background()
-	DB = &DBX{}
+	mockDB := &MockDB{}
 	t.Run("success", func(t *testing.T) {
-		defer reset()
-		assert.Equal(t, nil, DB.NewTransaction(ctx, func(ctx context.Context, tx *Tx) error {
+		defer resetTrans()
+		assert.Equal(t, nil, NewTransaction(ctx, mockDB, func(ctx context.Context, tx Transaction) error {
 			return nil
 		}))
 		assert.Equal(t, false, rollback)
-		assert.Equal(t, true, committed)
+		assert.Equal(t, true, commit)
 	})
 	t.Run("return error", func(t *testing.T) {
-		defer reset()
+		defer resetTrans()
 		returnErr := errors.New("return error")
-		err := DB.NewTransaction(ctx, func(ctx context.Context, tx *Tx) error {
+		err := NewTransaction(ctx, mockDB, func(ctx context.Context, tx Transaction) error {
 			return errors.WithStack(returnErr)
 		})
 		assert.Equal(t, true, rollback)
-		assert.Equal(t, false, committed)
+		assert.Equal(t, false, commit)
 		assert.Equal(t, returnErr, errors.Cause(err))
 	})
 	t.Run("panic error", func(t *testing.T) {
-		defer reset()
+		defer resetTrans()
 		panicErr := errors.New("panic error")
-		assert.Equal(t, panicErr, DB.NewTransaction(ctx, func(ctx context.Context, tx *Tx) error {
+		err := NewTransaction(ctx, mockDB, func(ctx context.Context, tx Transaction) error {
 			panic(panicErr)
-		}))
+		})
 		assert.Equal(t, true, rollback)
-		assert.Equal(t, false, committed)
+		assert.Equal(t, false, commit)
+		assert.Equal(t, panicErr, errors.Cause(err))
 	})
 
 }

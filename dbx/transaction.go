@@ -3,28 +3,14 @@ package dbx
 import (
 	"context"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
-type DBX struct {
-	*sqlx.DB
-}
-type Tx struct {
-	*sqlx.Tx
-}
-
-//go:noinline
-func (t *Tx) Rollback() error {
-	return t.Tx.Rollback()
-}
-
-func (d *DBX) NewTransaction(ctx context.Context, fn func(ctx context.Context, tx *Tx) error) (err error) {
-	t, err := d.Beginx()
+func NewTransaction(ctx context.Context, db Database, fn func(ctx context.Context, tx Transaction) error) (err error) {
+	tx, err := db.Begin()
 	if err != nil {
-		return errors.Wrap(err, "beginx")
+		return errors.Wrap(err, "begin")
 	}
-	tx := &Tx{Tx: t}
 	// recover
 	defer func() {
 		if r := recover(); r != nil {
