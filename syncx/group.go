@@ -1,4 +1,4 @@
-package safe
+package syncx
 
 import "sync"
 
