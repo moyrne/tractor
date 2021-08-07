@@ -1,7 +1,5 @@
 package dbx
 
-var DB Database
-
 type DSN struct {
 	Host     string
 	Port     int

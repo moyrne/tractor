@@ -8,14 +8,14 @@ import (
 
 const DefaultMySQLDSN = "%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true"
 
-func ConnectMySQL(format string, data DSN) (err error) {
+func ConnectMySQL(format string, data DSN) (db Database, err error) {
 	dsn := fmt.Sprintf(format, data.User, data.Password, data.Host, data.Port, data.DBName)
-	db, err := sqlx.Connect("mysql", dsn)
+	dbMySQL, err := sqlx.Connect("mysql", dsn)
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
-	db.SetMaxIdleConns(5)
-	db.SetMaxOpenConns(30)
-	DB = &DatabaseSQLX{DB: db}
-	return errors.WithStack(DB.Ping())
+	dbMySQL.SetMaxIdleConns(5)
+	dbMySQL.SetMaxOpenConns(30)
+	db = &DatabaseSQLX{DB: dbMySQL}
+	return db, errors.WithStack(db.Ping())
 }
